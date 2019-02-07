@@ -1,0 +1,27 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: action-server
+  name: action-server
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: action-server
+    spec:
+      containers:
+      - image: rasa/rasa_core_sdk:latest
+        name: action-server
+        volumeMounts:
+        - mountPath: /app/actions
+          name: git-volume
+          subPath: rasa/actions
+      restartPolicy: Always
+      volumes:
+      - name: git-volume
+        persistentVolumeClaim:
+          claimName: rasa-pv-claim

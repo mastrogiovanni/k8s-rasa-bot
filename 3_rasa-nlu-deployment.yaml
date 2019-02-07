@@ -1,0 +1,30 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: rasa-nlu
+  name: rasa-nlu
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: rasa-nlu
+    spec:
+      containers:
+      - args:
+        - start
+        - --path
+        - models/rasa/models/rasa_nlu
+        image: rasa/rasa_nlu:latest-spacy
+        name: rasa-nlu
+        volumeMounts:
+        - mountPath: /app/models
+          name: git-volume
+      restartPolicy: Always
+      volumes:
+      - name: git-volume
+        persistentVolumeClaim:
+          claimName: rasa-pv-claim

@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: rasa-core
+  name: rasa-core
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: rasa-core
+    spec:
+      containers:
+      - args:
+        - start
+        - --core
+        - model/rasa/models/rasa_core
+        - -c
+        - rest
+        - --endpoints
+        - /app/model/rasa/config/endpoints.yml
+        - -u
+        - current/
+        image: rasa/rasa_core:latest
+        name: rasa-core
+        ports:
+        - containerPort: 5005
+        volumeMounts:
+        - mountPath: /app/model
+          name: git-volume
+      restartPolicy: Always
+      volumes:
+      - name: git-volume
+        persistentVolumeClaim:
+          claimName: rasa-pv-claim
