@@ -1,11 +1,11 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: sequential-jobs
+  name: rasa-train-job
 spec:
   template:
     metadata:
-      name: sequential-job
+      name: rasa-train-job
     spec:
       initContainers:
       - name: cleanup-dir
