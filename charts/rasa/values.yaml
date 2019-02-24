@@ -9,6 +9,14 @@ image:
     repository: rasa/rasa_nlu
     tag: latest-spacy
     pullPolicy: IfNotPresent
+  core:
+    repository: rasa/rasa_core
+    tag: latest
+    pullPolicy: IfNotPresent
+  action_server:
+    repository: rasa/rasa_core_sdk
+    tag: latest
+    pullPolicy: IfNotPresent
 
 nameOverride: ""
 fullnameOverride: ""
@@ -45,7 +53,7 @@ resources: {}
 storage:
   className: "manual"
   size: 3Gi
-  gitUrl: "https://github.com/mastrogiovanni/rasa.git"
+  gitUrl: "https://github.com/mastrogiovanni/k8s-rasa-tutorial.git"
 
 nodeSelector: {}
 

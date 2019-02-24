@@ -13,6 +13,19 @@ spec:
       labels:
         app: action-server
     spec:
+      initContainers:
+        - name: wait-training-begin
+          image: busybox
+          command: ["sh", "-c", "until test ! -f '/git/rasa/training-begin.out'; do sleep 2; done"]
+          volumeMounts:
+          - mountPath: /git
+            name: git-volume
+        - name: wait-training-end
+          image: busybox
+          command: ["sh", "-c", "until test -f '/git/rasa/training-terminated.out'; do sleep 2; done"]
+          volumeMounts:
+          - mountPath: /git
+            name: git-volume
       containers:
       - image: rasa/rasa_core_sdk:latest
         name: action-server

@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "rasa.fullname" . }}-nlu
+  name: action-server # {{ include "rasa.fullname" . }}-action-server
   labels:
-    app.kubernetes.io/name: {{ include "rasa.name" . }}-nlu
+    app.kubernetes.io/name: {{ include "rasa.name" . }}-action-server
     helm.sh/chart: {{ include "rasa.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -13,12 +13,12 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "rasa.name" . }}-nlu
+      app.kubernetes.io/name: {{ include "rasa.name" . }}-action-server
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "rasa.name" . }}-nlu
+        app.kubernetes.io/name: {{ include "rasa.name" . }}-action-server
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       initContainers:
@@ -29,30 +29,16 @@ spec:
           - mountPath: /git
             name: {{ include "rasa.name" . }}
       containers:
-        - name: {{ .Chart.Name }}-nlu
-          image: "{{ .Values.image.nlu.repository }}:{{ .Values.image.nlu.tag }}"
-          imagePullPolicy: {{ .Values.image.nlu.pullPolicy }}
-          args:
-          - start
-          - --path
-          - models/rasa/models/rasa_nlu
-          ports:
-            - name: http-nlu
-              containerPort: 5000
-              protocol: TCP
-#          livenessProbe:
-#            httpGet:
-#              path: /
-#              port: http
-#          readinessProbe:
-#            httpGet:
-#              path: /
-#              port: http
-          volumeMounts:
-          - mountPath: /app/models
-            name: {{ include "rasa.name" . }}
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+      - image: "{{ .Values.image.action_server.repository }}:{{ .Values.image.action_server.tag }}"
+        imagePullPolicy: {{ .Values.image.action_server.pullPolicy }}
+        name: {{ .Chart.Name }}-action-server
+        volumeMounts:
+        - mountPath: /app/actions
+          name: {{ include "rasa.name" . }}
+          subPath: rasa/actions
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+      restartPolicy: Always
       volumes:
       - name: {{ include "rasa.name" . }}
         persistentVolumeClaim:
@@ -69,6 +55,3 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-
-
-

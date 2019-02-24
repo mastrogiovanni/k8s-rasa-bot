@@ -24,6 +24,12 @@ spec:
         - clone
         - https://github.com/mastrogiovanni/rasa.git
         - /git/rasa
+      - name: starting
+        image: busybox
+        command: ['sh', '-c', 'echo "Training Begin..."; echo "1" > /git/rasa/training-begin.out']
+        volumeMounts:
+        - mountPath: /git
+          name: git-volume
       - name: train-nlu
         image: rasa/rasa_core:latest
         imagePullPolicy: IfNotPresent
@@ -41,7 +47,10 @@ spec:
       containers:
       - name: job-done
         image: busybox
-        command: ['sh', '-c', 'echo "Training Completed!"']
+        command: ['sh', '-c', 'echo "Training Completed!"; echo "1" > /git/rasa/training-terminated.out; rm /git/rasa/training-begin.out']
+        volumeMounts:
+        - mountPath: /git
+          name: git-volume
       restartPolicy: Never
       volumes:
       - name: git-volume
