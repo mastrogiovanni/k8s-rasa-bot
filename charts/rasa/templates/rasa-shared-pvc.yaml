@@ -1,0 +1,16 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "rasa.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "rasa.name" . }}
+    helm.sh/chart: {{ include "rasa.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  storageClassName: {{.Values.storage.className}}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{.Values.storage.size}}

@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "rasa.fullname" . }}
+spec:
+  template:
+    metadata:
+      name: {{ include "rasa.fullname" . }}
+    spec:
+      initContainers:
+      - name: cleanup-dir
+        image: busybox
+        command: ['sh', '-c', 'rm -rf /git/rasa']
+        volumeMounts:
+        - mountPath: /git 
+          name: git-volume
+      - name: git-sync
+        image: alpine/git
+        volumeMounts:
+        - mountPath: /git 
+          name: git-volume
+        command:
+        - git
+        - clone
+        - {{.Values.storage.gitUrl}}
+        - /git/rasa
+      - name: train-nlu
+        image: rasa/rasa_core:latest
+        imagePullPolicy: IfNotPresent
+        args: ['train', '--domain', '/git/rasa/domain.yml', '--stories', '/git/rasa/data/stories.md', '--out', '/git/rasa/models/rasa_core'] 
+        volumeMounts:
+        - mountPath: /git
+          name: git-volume
+      - name: train-dialog
+        image: rasa/rasa_nlu:latest-spacy
+        imagePullPolicy: IfNotPresent
+        args: ['run', 'python', '-m', 'rasa_nlu.train', '-c', 'config.yml', '-d', '/git/rasa/data/nlu.md', '-o', '/git/rasa/models/rasa_nlu', '--project', 'current']
+        volumeMounts:
+        - mountPath: /git
+          name: git-volume
+      containers:
+      - name: job-done
+        image: busybox
+        command: ['sh', '-c', 'echo "Training Completed!"; echo "1" > /git/rasa/training-terminated.out']
+        volumeMounts:
+        - mountPath: /git
+          name: git-volume
+      restartPolicy: Never
+      volumes:
+      - name: git-volume
+        persistentVolumeClaim:
+          claimName: {{ include "rasa.fullname" . }}
