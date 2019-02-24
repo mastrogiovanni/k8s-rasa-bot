@@ -6,3 +6,7 @@
 
 - Service is called rasa-nlu (no helm parameters): this because configuration has the name of the service coded.
 It should be instead declared in a config map or similar (config/endpoints.yml) and not in the git repo
+
+- Improve startup mechanism: train job must create a file at begin and delete at
+
+- Add helm hook post uninistall cleanuo disk space
